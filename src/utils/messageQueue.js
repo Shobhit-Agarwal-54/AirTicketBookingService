@@ -6,6 +6,7 @@ const createChannel=async()=>{
         // Setting up a connection using nodeJS based client for RabbitMQ
         const connection=await amqplib.connect(MESSAGE_BROKER_URL);
         const channel=await connection.createChannel();
+        // channel object is used to connect to the message broker and to the queue.
 // assertExchange function setup Exchange Destributor for sending the
 //  messages  to queues based on their binding key.
         await channel.assertExchange(EXCHANGE_NAME,"direct",false);
@@ -18,7 +19,7 @@ const createChannel=async()=>{
 
 const  subscribeMessage=async (channel,service,binding_key)=>{
     try {
-        const applicationQueue=await channel.assertQueue("QUEUE_NAME");
+        const applicationQueue=await channel.assertQueue("REMINDER_QUEUE");
         // assertQueue function will return the queue if it is present 
         // or create a queue and return it.
         channel.bindQueue(applicationQueue.queue,EXCHANGE_NAME,binding_key);
@@ -37,7 +38,7 @@ const  subscribeMessage=async (channel,service,binding_key)=>{
 
 const publishMessage=async(channel,binding_key,message)=>{
     try {
-        await channel.assertQueue("QUEUE_NAME");
+        await channel.assertQueue("REMINDER_QUEUE");
         await channel.publish(EXCHANGE_NAME,binding_key,Buffer.from(message));
         // We are not sending the message object directly we are sending it as covered on a buffer object
     } catch (error) {
